@@ -1,0 +1,55 @@
+- name: myplaybook for learning apache2
+  hosts: tomcat
+  become: true
+  become_user: root
+  tasks:
+    - name: Installing ZIP
+      apt:
+        name: zip
+        state: latest
+
+    - name: Installing UNZIP
+      apt:
+        name: unzip
+        state: latest
+
+    - name: Installing JDK11
+      apt:
+        name: openjdk-11-jdk
+        state: latest
+
+    - name: Download Tomcat Server Packages
+      get_url:
+        url: https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.zip
+        dest: /tmp
+
+    - name: Unzip Tomcat File
+      ansible.builtin.unarchive:
+        src: /tmp/apache-tomcat-8.5.72.zip
+        dest: /tmp
+        remote_src: yes
+
+    - name: Change Permissions to "startup.sh"
+      file:
+        dest: /tmp/apache-tomcat-8.5.72/bin/startup.sh
+        mode: +x
+
+    - name: Change Permissions to "catalina.sh"
+      file:
+        dest: /tmp/apache-tomcat-8.5.72/bin/catalina.sh
+        mode: +x
+
+    - name: Change Permissions to "shutdown.sh"
+      file:
+        dest: /tmp/apache-tomcat-8.5.72/bin/shutdown.sh
+        mode: +x
+
+    - name: Change Permissions to /tmp/apache-tomcat-8.5.72 folder
+      file:
+        dest: /tmp/apache-tomcat-8.5.72
+        owner: root
+        mode: 0777
+        recurse: yes
+
+    - name: Restart Tomcat
+      shell: nohup /tmp/apache-tomcat-8.5.72/bin/startup.sh
